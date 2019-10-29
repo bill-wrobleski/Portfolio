@@ -1,0 +1,54 @@
+#Load the necessary libraries
+library(survival)
+library(ggplot2)
+library(survminer)
+
+#Load the lung dataset
+df <- lung
+attach(df)
+
+#Kaplan-Meier non-parametric analysis
+kmsurvival <- survfit(Surv(time,status) ~ 1)
+summary(kmsurvival)
+plot(kmsurvival, xlab = 'Days', ylab = 'Survival Probability')
+
+#Kaplan-Meier non-parametric analysis with ggsurvplot
+ggsurvplot(fit = survfit(Surv(time,status) ~ 1, data = lung), xlab = 'Days', ylab = 'Survival probability')
+
+#Estimating survival beyond 1 year
+summary(survfit(Surv(time, status) ~ 1, data = lung), times = 365.25)
+
+#Estimating median survival time
+survfit(Surv(time, status) ~ 1, data = lung)
+
+#Kaplan-Meier non-parametric analysis by sex
+kmsurvivall <- survfit(Surv(time,status) ~ sex)
+plot(kmsurvivall, xlab = 'Days', ylab = 'Survival Probability')
+summary(kmsurvivall)
+
+#Kaplan-Meier non-parametric analysis by sex with ggsurvplot
+ggsurvplot(fit = survfit(Surv(time,status) ~ sex, data = lung), xlab = 'Days', ylab = 'Survival probability',palette = c("cornflowerblue", "darksalmon"))
+
+#Comparing survival times between sexes
+survdiff(Surv(time, status) ~ sex, data = lung)
+
+#Nelson-Aalen non-parametric analysis
+nasurvival <- survfit(coxph(Surv(time,status)~1), type='aalen')
+plot(nasurvival, xlab = 'Days', ylab = 'Survival Probability')
+
+#Nelson-Aalen non-parametric analysis with ggsurvplot
+ggsurvplot(fit = survfit(coxph(Surv(time,status) ~ 1), data = lung, type='aalen'), xlab = 'Days', ylab = 'Survival probability')
+
+#Cox proportional hazard model - coefficients and hazard rates
+coxph <- coxph(Surv(time,status) ~ cbind(sex,ph.ecog), method = 'breslow')
+summary(coxph)
+
+#Exponential, Weibull, and log-logistic parametric model coefficients
+exponential <- survreg(Surv(time,status) ~ cbind(sex,ph.ecog), dist = 'exponential')
+summary(exponential)
+
+weibull <- survreg(Surv(time, status) ~ cbind(sex,ph.ecog), dist = 'weibull')
+summary(weibull)
+
+loglogistic <- survreg(Surv(time, status) ~ cbind(sex,ph.ecog), dist = 'loglogistic')
+summary(loglogistic)
